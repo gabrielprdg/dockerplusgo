@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
@@ -10,7 +11,7 @@ type Storage interface {
 	CreateProduct(*ProductCreate) (*Product, error)
 	DeleteProduct(int) error
 	UpdateProduct(*Product) error
-	GetProductById(int) (*Product, error)
+	GetProductById(string) (*Product, error)
 	GetProducts() ([]*Product, error)
 }
 
@@ -82,8 +83,17 @@ func (s *PostgresStorage) UpdateProduct(*Product) error {
 	return nil
 }
 
-func (s *PostgresStorage) GetProductById(id int) (*Product, error) {
-	return nil, nil
+func (s *PostgresStorage) GetProductById(id string) (*Product, error) {
+	rows, err := s.db.Query("SELECT * FROM products WHERE id=$1", id)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanIntoProduct(rows)
+	}
+
+	return nil, fmt.Errorf("product %s not found", id)
 }
 
 func (s *PostgresStorage) GetProducts() ([]*Product, error) {

@@ -61,8 +61,12 @@ func (s *ApiServer) HandleGetProducts(w http.ResponseWriter, r *http.Request) er
 
 func (s *ApiServer) HandleGetProductById(w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)["id"]
-	fmt.Println(vars)
-	return WriteJSON(w, http.StatusOK, vars)
+
+	product, err := s.storage.GetProductById(vars)
+	if err != nil {
+		return err
+	}
+	return WriteJSON(w, http.StatusOK, product)
 }
 
 func (s *ApiServer) HandleCreateProduct(w http.ResponseWriter, r *http.Request) error {
